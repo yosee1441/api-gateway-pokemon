@@ -9,7 +9,7 @@ import { map } from 'rxjs/operators';
 
 export interface Response<T> {
   data: T;
-  status: string;
+  notifications: [];
 }
 
 @Injectable()
@@ -20,8 +20,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
   ): Observable<Response<T>> {
     return next.handle().pipe(
       map((data) => ({
-        status: 'success',
         data,
+        notifications: [],
       })),
     );
   }

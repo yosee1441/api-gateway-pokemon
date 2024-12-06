@@ -2,7 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-import { RpcCustomExceptionFilter, envs, ResponseInterceptor } from './common';
+import {
+  HttpExceptionFilter,
+  envs,
+  ResponseInterceptor,
+  validationExceptionFactory,
+} from './common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,8 +16,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalFilters(new RpcCustomExceptionFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      exceptionFactory: validationExceptionFactory,
+    }),
+  );
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   const options = new DocumentBuilder()
